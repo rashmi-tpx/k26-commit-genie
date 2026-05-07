@@ -3,75 +3,74 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ServiceNow Release Quiz | Knowledge26 Lab</title>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+  <title>ServiceNow Releases Quiz Game</title>
   <style>
-    body{font-family:'Outfit',sans-serif;background:#181f2a;color:#e8f4f8;min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden;}
-    .header-img,.footer-img{width:100%;display:block;min-height:60px;background:#181f2a;}
-    .quiz-container{background:rgba(24,31,42,0.95);border-radius:12px;padding:32px 20px;max-width:420px;margin:auto;box-shadow:0 2px 12px rgba(0,199,177,0.08);}
-    h1{color:#62d84e;font-size:2rem;text-align:center;margin-bottom:18px;}
-    .question{font-size:1.1rem;color:#e8f4f8;margin-bottom:16px;font-weight:700;}
-    .options{display:flex;flex-direction:column;gap:12px;margin-bottom:18px;}
-    .option-btn{background:linear-gradient(135deg,#62d84e,#00c7b1);color:#181f2a;font-weight:700;border:none;border-radius:8px;padding:12px 0;cursor:pointer;transition:transform .1s;}
-    .option-btn:hover{transform:translateY(-2px);}
-    .feedback{font-size:1rem;color:#7a9bb5;margin-bottom:12px;min-height:24px;}
-    .score{font-size:1rem;color:#00c7b1;text-align:center;margin-bottom:12px;}
-    .restart-btn{background:#00c7b1;color:#181f2a;font-weight:700;border:none;border-radius:8px;padding:10px 0;width:100%;cursor:pointer;margin-top:16px;}
-    @media(max-width:600px){.quiz-container{padding:18px 6px;}}
+    body{background:#181c2a;color:#e8f4f8;font-family:sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+    .quiz-card{background:#232a3d;border-radius:12px;padding:32px 24px;box-shadow:0 2px 8px rgba(0,0,0,0.15);max-width:420px;width:100%;}
+    h1{color:#62d84e;font-size:2rem;margin-bottom:16px;text-align:center;}
+    .question{font-size:1.1rem;margin-bottom:18px;color:#e8f4f8;}
+    .choices{display:flex;flex-direction:column;gap:12px;margin-bottom:18px;}
+    .choice-btn{background:#1e2333;color:#e8f4f8;border:1px solid #62d84e;border-radius:8px;padding:12px;font-size:1rem;cursor:pointer;transition:background .2s;}
+    .choice-btn:hover{background:#62d84e;color:#181c2a;}
+    .feedback{font-size:1rem;margin-bottom:18px;color:#00c7b1;min-height:24px;}
+    .score{font-size:1.1rem;color:#7a9bb5;margin-bottom:18px;text-align:center;}
+    .restart-btn{background:linear-gradient(135deg,#62d84e,#00c7b1);color:#181c2a;font-weight:700;border:none;border-radius:10px;padding:12px 24px;font-size:1rem;cursor:pointer;margin-top:12px;}
+    @media(max-width:600px){.quiz-card{padding:18px 8px;}}
   </style>
 </head>
 <body>
-  <img src="https://via.placeholder.com/1200x140?text=Header+Image" class="header-img" alt="Header" />
-  <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:40px 10px;">
-    <div class="quiz-container">
-      <h1>ServiceNow Release Quiz</h1>
-      <div class="score" id="score">Score: 0/0</div>
-      <div class="question" id="question"></div>
-      <div class="options" id="options"></div>
-      <div class="feedback" id="feedback"></div>
-      <button class="restart-btn" id="restart" style="display:none;">Restart Quiz</button>
-    </div>
+  <div class="quiz-card">
+    <h1>ServiceNow Releases Quiz</h1>
+    <div class="score" id="score"></div>
+    <div class="question" id="question"></div>
+    <div class="choices" id="choices"></div>
+    <div class="feedback" id="feedback"></div>
+    <button class="restart-btn" id="restart" style="display:none;">Restart Quiz</button>
   </div>
-  <img src="https://via.placeholder.com/1200x28?text=Footer+Image" class="footer-img" alt="Footer" />
   <script>
     const quiz=[
-      {q:"What is the codename for the ServiceNow Tokyo release?",o:["Tokyo","Quebec","Rome","Paris"],a:0},
-      {q:"Which year was the ServiceNow Paris release launched?",o:["2019","2020","2021","2018"],a:1},
-      {q:"Which feature was introduced in the ServiceNow Quebec release?",o:["AI Search","Flow Designer","Mobile App","Performance Analytics"],a:0},
-      {q:"What is the codename for the ServiceNow release after Rome?",o:["San Diego","Tokyo","Paris","Quebec"],a:0},
-      {q:"Which ServiceNow release introduced the App Engine Studio?",o:["Rome","San Diego","Quebec","Paris"],a:2}
+      {q:"Which ServiceNow release introduced Flow Designer?",a:["London","Madrid","New York","Orlando"],c:1},
+      {q:"What is the codename for the ServiceNow Paris release?",a:["City of Lights","Eiffel","Louvre","Paris"],c:3},
+      {q:"Which release added Virtual Agent?",a:["Kingston","London","Madrid","New York"],c:2},
+      {q:"ServiceNow's Orlando release was launched in which year?",a:["2018","2019","2020","2021"],c:2},
+      {q:"Which feature was first available in the New York release?",a:["Mobile App","Flow Designer","Virtual Agent","Performance Analytics"],c:0}
     ];
-    let idx=0,score=0;
-    const qEl=document.getElementById('question'),oEl=document.getElementById('options'),fEl=document.getElementById('feedback'),sEl=document.getElementById('score'),rBtn=document.getElementById('restart');
+    let idx=0,score=0,answered=false;
+    const qEl=document.getElementById('question'),cEl=document.getElementById('choices'),fEl=document.getElementById('feedback'),sEl=document.getElementById('score'),rBtn=document.getElementById('restart');
     function showQ(){
-      sEl.textContent=`Score: ${score}/${idx}`;
+      sEl.textContent=`Question ${idx+1} of ${quiz.length} | Score: ${score}`;
+      qEl.textContent=quiz[idx].q;
+      cEl.innerHTML='';
       fEl.textContent='';
-      if(idx<quiz.length){
-        qEl.textContent=quiz[idx].q;
-        oEl.innerHTML='';
-        quiz[idx].o.forEach((opt,i)=>{
-          const b=document.createElement('button');
-          b.className='option-btn';
-          b.textContent=opt;
-          b.onclick=()=>checkA(i);
-          oEl.appendChild(b);
-        });
-      }else{
-        qEl.textContent='Quiz Complete!';
-        oEl.innerHTML='';
-        fEl.textContent=`Final Score: ${score}/${quiz.length}`;
-        rBtn.style.display='block';
-      }
+      answered=false;
+      quiz[idx].a.forEach((a,i)=>{
+        const btn=document.createElement('button');
+        btn.className='choice-btn';
+        btn.textContent=a;
+        btn.onclick=()=>answer(i);
+        cEl.appendChild(btn);
+      });
     }
-    function checkA(i){
-      if(i===quiz[idx].a){
-        fEl.textContent='Correct!';
+    function answer(i){
+      if(answered)return;
+      answered=true;
+      if(i===quiz[idx].c){
+        fEl.textContent='Correct! 🧞';
         score++;
       }else{
         fEl.textContent='Incorrect.';
       }
-      idx++;
-      setTimeout(showQ,900);
+      setTimeout(()=>{
+        idx++;
+        if(idx<quiz.length){showQ();}else{showScore();}
+      },900);
+    }
+    function showScore(){
+      qEl.textContent='Quiz Complete!';
+      cEl.innerHTML='';
+      fEl.textContent='';
+      sEl.textContent=`Final Score: ${score} / ${quiz.length}`;
+      rBtn.style.display='inline-block';
     }
     rBtn.onclick=()=>{idx=0;score=0;rBtn.style.display='none';showQ();};
     showQ();
